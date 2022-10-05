@@ -5,7 +5,6 @@ import { GCMD } from 'gcmd-keywords';
 import Keywords from 'mdkeywords';
 import ISO from 'mdcodes/resources/js/iso_topicCategory';
 import NGGDPP from '../data/sciencebase-nggdpp-vocabulary';
-// const NGGDPP = [];
 
 let service = EmberObject.create({
   thesaurus: A(),
