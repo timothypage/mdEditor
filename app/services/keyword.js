@@ -4,7 +4,7 @@ import EmberObject from '@ember/object';
 import { GCMD } from 'gcmd-keywords';
 import Keywords from 'mdkeywords';
 import ISO from 'mdcodes/resources/js/iso_topicCategory';
-import NGGDPP from '../data/sciencebase-nggdpp-vocabulary';
+// import NGGDPP from '../data/sciencebase-nggdpp-vocabulary';
 
 let service = EmberObject.create({
   thesaurus: A(),
@@ -13,6 +13,39 @@ let service = EmberObject.create({
       .find(function(t) {
         return t.citation.identifier[0].identifier === id;
       });
+  },
+
+  fetchSciencebaseVocab() {
+
+    if (service.get('thesaurus').find(item => item.label === 'NGGDPP Vocabulary'))
+      return Promise.resolve();
+
+    console.log('Fetching sciencebase vocab');
+
+    return fetch('http://localhost:8000/vocabulary.json')
+      .then(response => response.json())
+      .then(NGGDPP => {
+        service.get('thesaurus').pushObject({
+          citation: {
+            date: [{
+              date: '2022-09',
+              dateType: 'revision'
+            }],
+            title: 'NGGDPP',
+            edition: 'ISO 19115-2:2020',
+            onlineResource: [{
+              uri: 'https://www.sciencebase.gov/vocab/category/4f4e475ee4b07f02db47df09'
+            }],
+            identifier: [{
+              identifier: 'NGGDPP Vocabulary'
+            }],
+          },
+          keywords: NGGDPP,
+          keywordType: 'NGGDPPkeywords',
+          label: 'NGGDPP Vocabulary'
+        })
+      })
+      .catch(err => console.log('Request Failed', err));
   }
 });
 
@@ -79,24 +112,5 @@ service.get('thesaurus')
 
 service.get('thesaurus').pushObjects(Keywords.asArray());
 
-service.get('thesaurus').pushObject({
-  citation: {
-    date: [{
-      date: '2022-09',
-      dateType: 'revision'
-    }],
-    title: 'NGGDPP',
-    edition: 'ISO 19115-2:2020',
-    onlineResource: [{
-      uri: 'https://www.sciencebase.gov/vocab/category/4f4e475ee4b07f02db47df09'
-    }],
-    identifier: [{
-      identifier: 'NGGDPP Vocabulary'
-    }],
-  },
-  keywords: NGGDPP,
-  keywordType: 'NGGDPPkeywords',
-  label: 'NGGDPP Vocabulary'
-})
 
 export default Service.extend(service);
