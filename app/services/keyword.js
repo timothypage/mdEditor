@@ -22,7 +22,7 @@ let service = EmberObject.create({
 
     console.log('Fetching sciencebase vocab');
 
-    return fetch('http://localhost:8000/vocabulary.json')
+    return fetch('https://timothypage.github.io/vocab-harvester/vocabulary.json')
       .then(response => response.json())
       .then(NGGDPP => {
         service.get('thesaurus').pushObject({
