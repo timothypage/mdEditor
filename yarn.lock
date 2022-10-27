@@ -9530,10 +9530,9 @@ mdn-links@^0.1.0:
   resolved "https://registry.yarnpkg.com/mdn-links/-/mdn-links-0.1.0.tgz#e24c83b97cb4c5886cc39f2f780705fbfe273aa5"
   integrity sha1-4kyDuXy0xYhsw58veAcF+/4nOqU=
 
-mdprofiles@^0.2.4:
+"mdprofiles@github:timothypage/mdProfiles#feature/nggdpp-profiles":
   version "0.2.4"
-  resolved "https://registry.yarnpkg.com/mdprofiles/-/mdprofiles-0.2.4.tgz#e24704b55437d1e819855b516a03acbadd7cfdb8"
-  integrity sha512-D0+PU3m1S7k+jV5DZ3cE6aFDsVAXIaaE76aUUP1b1DtEH8Ru5H02YVtCI5UiZFdxMwWia+tXZcdzp5TPDLevgQ==
+  resolved "https://codeload.github.com/timothypage/mdProfiles/tar.gz/7750452012dddfc250d2d1d628f7756aaec95b20"
   dependencies:
     ajv "^6.10.0"
 
