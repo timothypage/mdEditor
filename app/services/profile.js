@@ -34,6 +34,7 @@ export default Service.extend({
 
     this.profileRecords = this.store.peekAll('profile');
     //this.customProfiles = this.get('store').peekAll('custom-profile');
+    console.log('coreProfiles', coreProfiles);
     this.coreProfiles = coreProfiles;
   },
 

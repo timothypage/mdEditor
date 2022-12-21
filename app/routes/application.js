@@ -7,7 +7,7 @@ import RSVP from 'rsvp';
 import { inject as service } from '@ember/service';
 import config from 'mdeditor/config/environment';
 
-const {
+let {
   APP: {
     defaultProfileId
   }
@@ -35,6 +35,28 @@ export default Route.extend({
   spotlight: service(),
   slider: service(),
   router: service(),
+  profile: service('custom-profile'),
+
+  fetchProfilesFromRemote (url) {
+    return fetch('https://' + url)
+      .then(response => response.json())
+      .then(data => {
+        let profiles = [];
+
+        for (const profile of data.profiles) {
+          let localProfile = this.store.createRecord('custom-profile', {
+            id: profile.identifier,
+            title: profile.title,
+            description: profile.description,
+            profile
+          });
+
+          profiles.push(localProfile);
+        }
+
+        return profiles;
+      })
+  },
 
   /**
    * Models for sidebar navigation
@@ -42,6 +64,19 @@ export default Route.extend({
    * @return {Ember.RSVP.hash}
    */
   model() {
+
+    let queryParams = new URLSearchParams(window.location.search);
+    const loadProfilesFrom = queryParams.get('loadProfilesFrom');
+    const profileToLoad = queryParams.get('profile');
+
+    // debugger;
+    if (profileToLoad) {
+      this.profile.set('active', profileToLoad);
+
+      config.APP.defaultProfileId = profileToLoad;
+      defaultProfileId = profileToLoad;
+    }
+
     let promises = [this.store.findAll('record', {
         reload: true
       }),
@@ -92,6 +127,10 @@ export default Route.extend({
           reload: true
         })
       ];
+
+      if (loadProfilesFrom) {
+        this.fetchProfilesFromRemote(loadProfilesFrom);
+      }
 
       return RSVP.all(profiles).then(() => result);
 
