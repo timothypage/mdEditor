@@ -38,7 +38,7 @@ export default Route.extend({
   profile: service('custom-profile'),
 
   fetchProfilesFromRemote (url) {
-    return fetch('https://' + url)
+    return fetch('http://' + url)
       .then(response => response.json())
       .then(data => {
         let profiles = [];
@@ -48,8 +48,16 @@ export default Route.extend({
             id: profile.identifier,
             title: profile.title,
             description: profile.description,
-            profile
           });
+
+          for (const contact of profile.contacts) {
+            this.store.createRecord('contact', {
+              ...contact,
+              json: { ...contact }
+            })
+          }
+
+
 
           profiles.push(localProfile);
         }
