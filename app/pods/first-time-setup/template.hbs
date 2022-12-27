@@ -1,23 +1,48 @@
 <h1>First Time Setup</h1>
-<button {{action "fetchData"}}>Fetch Data</button>
+<button {{action "fetchData"}}>Fetch Data Again</button>
 
-<h2>Contacts</h2>
-<ul>
-{{#each model.dataToImport.contacts as |contact|}}
-<li>{{contact.name}}</li>
-{{/each}}
-</ul>
+<div class="row">
+  <div class="col-xl-8">
+    {{#layout/md-card
+      title="Contacts"
+      titleIcon="users"
+      shadow=true
+    }}
+      {{control/md-record-table
+        data=model.dataToImport.contacts
+        dataColumns=(compute (route-action "getColumns" "columnsForContact"))
+        selectProperty="_selected"
+        showColumnsDropdown=false
+        actionsColumn=false
+      }}
+    {{/layout/md-card}}
 
-<h2>Profiles</h2>
-<ul>
-  {{#each model.dataToImport.profiles as |profile|}}
-  <li>{{profile.title}}</li>
-  {{/each}}
-</ul>
+    {{#layout/md-card
+      title="Profiles"
+      titleIcon="gear"
+    }}
+      {{control/md-record-table
+        data=model.dataToImport.profiles
+        dataColumns=(compute (route-action "getColumns" "columnsForProfile"))
+        selectProperty="_selected"
+        showColumnsDropdown=false
+        actionsColumn=false
+      }}
+    {{/layout/md-card}}
 
-<h2>Thesaurus</h2>
-<ul>
-  {{#each model.dataToImport.thesaurus as |thes|}}
-  <li>{{thes.label}}</li>
-  {{/each}}
-</ul>
+    {{#layout/md-card
+      title="Thesaurus"
+      titleIcon="book"
+    }}
+      {{control/md-record-table
+        data=model.dataToImport.thesaurus
+        dataColumns=(compute (route-action "getColumns" "columnsForThesaurus"))
+        selectProperty="_selected"
+        showColumnsDropdown=false
+        actionsColumn=false
+      }}
+    {{/layout/md-card}}
+  </div>
+
+  <button type="button" class="btn btn-lg btn-success btn-block md-btn-responsive" {{action "import"}}>{{fa-icon "sign-in"}} Import Data</button>
+</div>
