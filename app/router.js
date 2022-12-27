@@ -7,6 +7,7 @@ const Router = EmberRouter.extend({
 });
 
 Router.map(function () {
+  this.route('first-time-setup');
   this.route('dashboard');
   this.route('export');
   this.route('import');

@@ -1,0 +1,23 @@
+<h1>First Time Setup</h1>
+<button {{action "fetchData"}}>Fetch Data</button>
+
+<h2>Contacts</h2>
+<ul>
+{{#each model.dataToImport.contacts as |contact|}}
+<li>{{contact.name}}</li>
+{{/each}}
+</ul>
+
+<h2>Profiles</h2>
+<ul>
+  {{#each model.dataToImport.profiles as |profile|}}
+  <li>{{profile.title}}</li>
+  {{/each}}
+</ul>
+
+<h2>Thesaurus</h2>
+<ul>
+  {{#each model.dataToImport.thesaurus as |thes|}}
+  <li>{{thes.label}}</li>
+  {{/each}}
+</ul>

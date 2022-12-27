@@ -50,12 +50,6 @@ export default Route.extend({
             description: profile.description,
           });
 
-          for (const contact of profile.contacts) {
-            this.store.createRecord('contact', {
-              ...contact,
-              json: { ...contact }
-            })
-          }
 
 
 
