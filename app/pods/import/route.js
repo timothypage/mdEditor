@@ -448,6 +448,8 @@ export default Route.extend(ScrollTo, {
 
       debugger;
 
+      console.log('store.importData data', data);
+
       store.importData(data, {
           truncate: !this.currentRouteModel()
             .get('merge'),

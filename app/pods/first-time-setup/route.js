@@ -1,24 +1,31 @@
 import Route from '@ember/routing/route';
 import { inject as service } from '@ember/service';
-import EmberObject, { get, set } from '@ember/object';
+import EmberObject, { computed, set } from '@ember/object';
+
+import { assign } from '@ember/polyfills';
+import { JsonDefault as Contact } from 'mdeditor/models/contact';
+import Base from 'ember-local-storage/adapters/base';
+
 
 const addSelected = item => ({ ...item, _selected: true });
+const generateIdForRecord = Base.create()
+  .generateIdForRecord;
 
-export default Route.extend({
-  model () {
-    return fetch('http://localhost:8000/mdjson-export-kbs.json')
-      .then(response => response.json())
-      .then(data => {
-        return {
-          dataToImport: {
-            contacts: data.contact.map(addSelected),
-            profiles: data.profile.map(addSelected),
-            thesaurus: data.thesaurus.map(addSelected)
-          }
-        };
-      });
+const Template = EmberObject.extend({
+  init() {
+    this._super(...arguments);
+
+    set(this, 'id', generateIdForRecord());
   },
+  attributes: computed(function () {
+    return {
+      json: null
+    }
+  }),
+  type: null
+});
 
+const columns = {
   columnsForContact: [
     {
       propertyName: 'name',
@@ -58,31 +65,66 @@ export default Route.extend({
       propertyName: 'keywordType',
       title: 'Keyword Type'
     }
-  ],
+  ]
+}
+
+
+export default Route.extend({
+  store: service(),
+  keyword: service(),
+
+  model () {
+    window.localStorage.clear();
+
+    return fetch('http://localhost:8000/mdjson-export-kbs.json')
+      .then(response => response.json())
+      .then(data => {
+        return {
+          dataToImport: {
+            contacts: data.contact.map(addSelected),
+            profiles: data.profile.map(addSelected),
+            thesaurus: data.thesaurus.map(addSelected)
+          }
+        };
+      });
+  },
+
 
   actions: {
-    fetchData () {
-      fetch('http://localhost:8000/mdjson-export-kbs.json')
-        .then(response => response.json())
-        .then(data => {
-          console.log(this.currentRouteModel());
-          console.log(data);
-          this.currentRouteModel().set('dataToImport.contacts', data.contact);
-          this.currentRouteModel().set('dataToImport.profiles', data.profile);
-          this.currentRouteModel().set(
-            'dataToImport.thesaurus',
-            data.thesaurus
-          );
-        });
-    },
 
     import () {
+      const importableContacts = this.currentRouteModel().dataToImport.contacts
+        .map(contact => {
+        return Template.create({
+          attributes: {
+            json: JSON.stringify(assign(Contact.create(), contact))
+          },
+          type: 'contacts'
+        })
+      });
 
+      const importableProfiles = this.currentRouteModel().dataToImport.profiles
+        .map(profile => {
+          return Template.create({
+            attributes: {
+              json: JSON.stringify(profile)
+            },
+            type: 'custom-profiles'
+          })
+        })
+
+      this.store.importData({data: [...importableContacts, ...importableProfiles]}, {truncate: true, json: false})
+
+
+      for (const thes of this.currentRouteModel().dataToImport.thesaurus) {
+        console.log('importing thes', thes);
+        this.keyword.get('thesaurus').pushObject(thes);
+      }
 
     },
 
     getColumns (type) {
-      return get(this, type);
+      return columns[type];
     }
   }
 });
