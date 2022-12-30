@@ -106,167 +106,50 @@ export default Route.extend({
         }
       );
 
-      const customProfile = {
-        uri: 'https://tzwolak.com/profile.json',
-        alias: 'TimZ Custom Profile alias',
-        title: 'TimZ Custom Profile title',
-        description: 'A super cool custom profile for TimZ datasets',
-        'profile-id': 'full'
-      };
-      const customSchema = {};
+      const importableProfiles = this.currentRouteModel().dataToImport.profiles
+        .map(profile => {
 
-      const customProfiles = [
-        {
-          id: generateIdForRecord(),
-          attributes: {
-            ...customProfile
-          },
-          type: 'custom-profiles'
-        },
-        {
-          id: generateIdForRecord(),
-          attributes: {
-            uri: 'https://tzwolak.com/profile.json',
-            alias: 'TimZ Profile alias',
-            title: 'TimZ Profile title',
-            "alt-description": 'Alternative Description for TimZ Profile',
-            config: JSON.stringify({
-              id: 'timz',
-              namespace: 'org.adiwg.profile',
-              alternalteId: ['timz'],
-              title: 'TimZ Profile config title',
-              description: 'Timz Config Description',
-              version: '0.0.1',
-              components: {
-                record: {},
-                contact: {},
-                dictionary: {}
+          return [
+            {
+              id: generateIdForRecord(),
+              attributes: {
+                uri: 'N/A',
+                alias: profile.title,
+                title: profile.title,
+                description: profile.description,
+                "profile-id": profile.identifier
               },
-              nav: {
-                record: [
-                  {
-                    title: 'Main',
-                    target: 'record.show.edit.main',
-                    tip: 'Basic information about the resource.'
-                  },
-                  {
-                    title: 'Metadata',
-                    target: 'record.show.edit.metadata',
-                    tip: 'Information about the metadata for the resource.'
-                  },
-                  {
-                    title: 'Keywords',
-                    target: 'record.show.edit.keywords',
-                    tip: 'Terms used to describe the resource.'
-                  },
-                  {
-                    title: 'Extent',
-                    target: 'record.show.edit.extent',
-                    tip: 'Information describing the bounds of the resource.'
-                  },
-                  {
-                    title: 'Spatial',
-                    target: 'record.show.edit.spatial',
-                    tip:
-                      'Information concerning the spatial attributes of the resource.'
-                  },
-                  {
-                    title: 'Lineage',
-                    target: 'record.show.edit.lineage',
-                    tip: 'Information on the history of the resource.'
-                  },
-                  {
-                    title: 'Taxonomy',
-                    target: 'record.show.edit.taxonomy',
-                    tip: 'Information on the taxa associated with the resource.'
-                  },
-                  {
-                    title: 'Distribution',
-                    target: 'record.show.edit.distribution',
-                    tip: 'Information about obtaining the resource.'
-                  },
-                  {
-                    title: 'Constraints',
-                    target: 'record.show.edit.constraint',
-                    tip:
-                      'Information about constraints applied to the resource.'
-                  },
-                  {
-                    title: 'Associated',
-                    target: 'record.show.edit.associated',
-                    tip:
-                      'Other resources with a defined relationship to the resource.'
-                  },
-                  {
-                    title: 'Documents',
-                    target: 'record.show.edit.documents',
-                    tip:
-                      'Other documents related to, but not defining, the resource.'
-                  },
-                  {
-                    title: 'Funding',
-                    target: 'record.show.edit.funding',
-                    tip:
-                      'Information about funding allocated to development of the resource.'
-                  },
-                  {
-                    title: 'Dictionaries',
-                    target: 'record.show.edit.dictionary',
-                    tip: 'Data dictionaries associated with the resource.'
-                  }
-                ],
-                dictionary: [
-                  {
-                    title: 'Main',
-                    target: 'dictionary.show.edit.index',
-                    tip: 'Basic information about the dictionary.'
-                  },
-                  {
-                    title: 'Citation',
-                    target: 'dictionary.show.edit.citation',
-                    tip: 'The citation for the dictionary.'
-                  },
-                  {
-                    title: 'Domains',
-                    target: 'dictionary.show.edit.domain',
-                    tip: 'Information about defined value lists.'
-                  },
-                  {
-                    title: 'Entities',
-                    target: 'dictionary.show.edit.entity',
-                    tip:
-                      'Information about entities(tables) and attributes(columns or fields).'
-                  }
-                ]
-              }
-            })
-          },
-          type: 'profiles'
-        }
-      ];
+              type: 'custom-profiles'
+            },
+            {
+              id: generateIdForRecord(),
+              attributes: {
+                uri: 'N/A',
+                alias: profile.title,
+                title: profile.title,
+                "alt-description": profile.description,
+                config: JSON.stringify({
+                  ...profile
+                })
+              },
+              type: 'profiles'
 
-      // const importableProfiles = this.currentRouteModel().dataToImport.profiles
-      //   .map(profile => {
-      //     return Template.create({
-      //       attributes: {
-      //         json: JSON.stringify(profile)
-      //       },
-      //       type: 'custom-profiles'
-      //     })
-      //   })
+
+            }
+          ]
+        }).flat()
 
       this.store.importData(
         {
           data: [
             ...importableContacts,
-            ...customProfiles
-            // ...importableProfiles
+            ...importableProfiles
           ]
         },
         { truncate: true, json: false }
       );
 
-      const profileId = customProfiles[0].id; // TODO: pick the first one, or should this be marked in some way from the api?
+      const profileId = importableProfiles[0].id; // TODO: pick the first one, or should this be marked in some way from the api?
 
       this.profile.set('active', profileId);
       defaultProfileId = profileId;
