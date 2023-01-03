@@ -154,8 +154,6 @@ export default Route.extend(ScrollTo, {
     } = data;
     let files;
 
-    debugger;
-
     if(isArray(data.json.data)) {
       files = this.mapEditorJSON(data);
     } else {
@@ -163,11 +161,9 @@ export default Route.extend(ScrollTo, {
       files = this.mapMdJSON(data);
     }
 
-    console.log('files', files);
     route.currentRouteModel()
       .set('files', files);
 
-    console.log('data', data);
     route.currentRouteModel()
       .set('data', json.data);
   },
@@ -183,7 +179,6 @@ export default Route.extend(ScrollTo, {
       map = map.concat(this.formatMdJSON(data.json));
     }
 
-    console.log('data.json.data', map)
     set(data, 'json.data', map);
 
     return this.mapRecords(map);
@@ -364,78 +359,55 @@ export default Route.extend(ScrollTo, {
           dataType: 'text',
           crossDomain: true
         })
-        .then(response => {
-          const json = JSON.parse(response);
+        .then(function (response) {
 
-          this.mapJSON({
-            json,
-            file: null,
-            route: this
-          });
-        })
-        .catch(response => {
-          const error = ` Error retrieving the mdJSON: ${response.status}: ${response.statusText}`;
+          if(response) {
+            let json;
 
-          set(this.controller, 'xhrError', error);
-          // set(this.controller, 'isLoading', false);
-          this.controller.flashMessages.danger(error);
-        })
-        .finally(() => {
-          set(this.controller, 'isLoading', false);
-          $('.md-import-picker input:file').val('');
+            new Promise((resolve, reject) => {
+                try {
+                  json = JSON.parse(response);
+                } catch(e) {
+                  reject(
+                    `Failed to parse data. Is it valid JSON?`);
+                }
+
+                resolve({
+                  json: json,
+                  file: null,
+                  route: route
+                });
+              })
+              .then((data) => {
+                //determine file type and map
+                route.mapJSON(data);
+
+              })
+              .catch((reason) => {
+                //catch any errors
+                get(controller, 'flashMessages')
+                  .danger(reason);
+                return false;
+              })
+              .finally(() => {
+                set(controller, 'isLoading', false);
+                $('.md-import-picker input:file')
+                  .val('');
+              });
+          } else {
+            set(controller, 'errors', response.messages);
+            get(controller, 'flashMessages')
+              .danger('Import error!');
+          }
+        }).catch((response) => {
+          let error =
+            ` Error retrieving the mdJSON: ${response.status}: ${response.statusText}`;
+
+          set(controller, 'xhrError', error);
+          set(controller, 'isLoading', false);
+          get(controller, 'flashMessages')
+            .danger(error);
         });
-
-
-
-        // .then(function (response) {
-
-        //   if(response) {
-        //     let json;
-
-        //     new Promise((resolve, reject) => {
-        //         try {
-        //           json = JSON.parse(response);
-        //         } catch(e) {
-        //           reject(
-        //             `Failed to parse data. Is it valid JSON?`);
-        //         }
-
-        //         resolve({
-        //           json: json,
-        //           file: null,
-        //           route: route
-        //         });
-        //       })
-        //       .then((data) => {
-        //         //determine file type and map
-        //         route.mapJSON(data);
-
-        //       })
-        //       .catch((reason) => {
-        //         //catch any errors
-        //         get(controller, 'flashMessages')
-        //           .danger(reason);
-        //         return false;
-        //       })
-        //       .finally(() => {
-        //         set(controller, 'isLoading', false);
-        //         $('.md-import-picker input:file')
-        //           .val('');
-        //       });
-        //   } else {
-        //     set(controller, 'errors', response.messages);
-        //     get(controller, 'flashMessages')
-        //       .danger('Import error!');
-        //   }
-        // }).catch((response) => {
-        //   let error =
-        //     ` Error retrieving the mdJSON: ${response.status}: ${response.statusText}`;
-
-        //   set(controller, 'xhrError', error);
-        //   set(controller, 'isLoading', false);
-        //   get(controller, 'flashMessages')
-        //     .danger(error);
-        // });
 
     },
     importData() {
@@ -445,10 +417,6 @@ export default Route.extend(ScrollTo, {
           .get('data')
           .filterBy('meta.export').rejectBy('type', 'settings')
       };
-
-      debugger;
-
-      console.log('store.importData data', data);
 
       store.importData(data, {
           truncate: !this.currentRouteModel()

@@ -20,7 +20,6 @@ export default Component.extend({
    * @param  {String} profile The new profile.
    */
   updateProfile(profile){
-    console.log('updateProfile', profile);
     this.profile.set('active', profile);
     this.record.save();
   },
