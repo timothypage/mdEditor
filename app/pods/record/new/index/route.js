@@ -7,10 +7,9 @@ export default Route.extend({
   redirect() {
     let rec = this.store.createRecord('record');
 
-    console.log('record profile is ', rec.profile);
-
-    console.log('setting record profile to', this.profile.get('active'));
-    rec.set('profile', this.profile.get('active'));
+    if (this.profile.get('active')) {
+      rec.set('profile', this.profile.get('active'));
+    }
 
     this.replaceWith('record.new.id', rec.id);
   }
