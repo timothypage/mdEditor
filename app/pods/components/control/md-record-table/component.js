@@ -180,7 +180,12 @@ export default Table.extend({
       let prop = this.selectProperty;
       let sel = get(this, 'selectedItems');
 
-      rec.toggleProperty(prop);
+      if (rec.toggleProperty) {
+        rec.toggleProperty(prop);
+      } else {
+        // not an Ember Object
+        rec[prop] = !rec[prop];
+      }
       this.select(rec, idx, sel);
     },
 

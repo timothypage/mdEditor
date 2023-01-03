@@ -100,7 +100,9 @@ export default Route.extend({
 
   actions: {
     import () {
-      const importableContacts = this.currentRouteModel().dataToImport.contacts.map(
+      const importableContacts = this.currentRouteModel().dataToImport.contacts
+        .filter(item => item._selected)
+        .map(
         contact => {
           return Template.create({
             attributes: {
@@ -112,6 +114,7 @@ export default Route.extend({
       );
 
       const importableProfiles = this.currentRouteModel().dataToImport.profiles
+        .filter(item => item._selected)
         .map(profile => {
 
           return [
@@ -160,6 +163,7 @@ export default Route.extend({
       defaultProfileId = profileId;
 
       for (const thes of this.currentRouteModel().dataToImport.thesaurus) {
+        if (!thes._selected) continue;
 
         // TODO make sure we don't create duplicates?
         this.keyword.get('thesaurus').pushObject(thes);
