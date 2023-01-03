@@ -77,10 +77,15 @@ export default Route.extend({
   keyword: service(),
   profile: service('custom-profile'),
 
-  model () {
-    window.localStorage.clear();
+  url: null,
 
-    return fetch('http://localhost:8000/mdjson-export-kbs.json')
+  model () {
+    let queryParams = new URLSearchParams(window.location.search);
+
+    // TODO: show some error if this isn't present
+    const loadProfilesFrom = queryParams.get('loadProfilesFrom');
+
+    return fetch('http://' + loadProfilesFrom)
       .then(response => response.json())
       .then(data => {
         return {
@@ -155,7 +160,7 @@ export default Route.extend({
       defaultProfileId = profileId;
 
       for (const thes of this.currentRouteModel().dataToImport.thesaurus) {
-        console.log('importing thes', thes);
+
         // TODO make sure we don't create duplicates?
         this.keyword.get('thesaurus').pushObject(thes);
       }
