@@ -64,6 +64,7 @@ const theModel = DS.Model.extend({
   language: DS.attr('string', {
     defaultValue: 'eng'
   }),
+  defaultProfileId: DS.attr('string'),
   importUriBase: DS.attr('string', {
     defaultValue: ''
   }),

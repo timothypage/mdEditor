@@ -76,6 +76,7 @@ export default Route.extend({
   store: service(),
   keyword: service(),
   profile: service('custom-profile'),
+  settings: service(),
 
   url: null,
 
@@ -90,16 +91,20 @@ export default Route.extend({
       .then(data => {
         return {
           dataToImport: {
-            contacts: data.contact.map(addSelected),
-            profiles: data.profile.map(addSelected),
-            thesaurus: data.thesaurus.map(addSelected)
-          }
+            contacts: (data.contact || []).map(addSelected),
+            profiles: (data.profile || []).map(addSelected),
+            // Default Ember pluralization thinks plural of thesaurus is thesaurus -_- I'm not going to mess with it
+            thesaurus: (data.thesaurus || []).map(addSelected)
+          },
+          importing: false
         };
       });
   },
 
   actions: {
-    import () {
+    async import () {
+      set(this.currentRouteModel(), 'importing', true);
+
       const importableContacts = this.currentRouteModel().dataToImport.contacts
         .filter(item => item._selected)
         .map(
@@ -145,28 +150,47 @@ export default Route.extend({
 
             }
           ]
-        }).flat()
+        }).flat();
+
+      const importableThesaurus = this.currentRouteModel().dataToImport.thesaurus
+        .filter(item => item._selected)
+        .map(
+          t => ({
+            id: generateIdForRecord(),
+            attributes: {
+              label: t.label,
+              citation: t.citation,
+              "keyword-type": t.keywordType,
+              keywords: t.keywords
+            },
+            type: 'thesaurus'
+          })
+        )
 
       this.store.importData(
         {
           data: [
             ...importableContacts,
-            ...importableProfiles
+            ...importableProfiles,
+            ...importableThesaurus
           ]
         },
         { truncate: true, json: false }
       );
 
-      const profileId = importableProfiles[0].id; // TODO: pick the first one, or should this be marked in some way from the api?
+      if (importableProfiles.length) {
+        const profileId = importableProfiles[0].id; // TODO: pick the first one, or should this be marked in some way from the api?
 
-      this.profile.set('active', profileId);
-      defaultProfileId = profileId;
+        this.profile.set('active', profileId);
+        defaultProfileId = profileId; // eslint-disable-line no-unused-vars
 
-      for (const thes of this.currentRouteModel().dataToImport.thesaurus) {
-        if (!thes._selected) continue;
+        let settings = this.settings.data;
 
-        // TODO make sure we don't create duplicates?
-        this.keyword.get('thesaurus').pushObject(thes);
+        settings.set('defaultProfileId', profileId);
+        await settings.save();
+
+
+        set(this.currentRouteModel(), 'importing', false);
       }
     },
 
