@@ -91,6 +91,7 @@ export default Route.extend({
       .then(data => {
         return {
           dataToImport: {
+            defaultProfileId: data.defaultProfileId,
             contacts: (data.contact || []).map(addSelected),
             profiles: (data.profile || []).map(addSelected),
             // Default Ember pluralization thinks plural of thesaurus is thesaurus -_- I'm not going to mess with it
@@ -178,9 +179,16 @@ export default Route.extend({
         { truncate: true, json: false }
       );
 
-      if (importableProfiles.length) {
-        const profileId = importableProfiles[0].id; // TODO: pick the first one, or should this be marked in some way from the api?
+      if (importableProfiles.length && this.currentRouteModel().dataToImport.defaultProfileId) {
 
+        // TODO less magic here
+        // find the current profile with the correct identifier
+        // (which is now in JSON under the `config` attribute),
+        // and bactrack by one to get the `custom-profile` instead of `profile`
+        // which is what we need to select the appropriate profile on record creation
+        const profileId = importableProfiles[
+          importableProfiles.findIndex(p => (p.attributes.config ? JSON.parse(p.attributes.config).identifier : null) === this.currentRouteModel().dataToImport.defaultProfileId) - 1
+        ].id
         this.profile.set('active', profileId);
         defaultProfileId = profileId; // eslint-disable-line no-unused-vars
 
@@ -188,10 +196,9 @@ export default Route.extend({
 
         settings.set('defaultProfileId', profileId);
         await settings.save();
-
-
-        set(this.currentRouteModel(), 'importing', false);
       }
+
+      set(this.currentRouteModel(), 'importing', false);
     },
 
     getColumns (type) {
