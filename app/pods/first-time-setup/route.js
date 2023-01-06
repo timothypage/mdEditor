@@ -86,7 +86,7 @@ export default Route.extend({
     // TODO: show some error if this isn't present
     const loadProfilesFrom = queryParams.get('loadProfilesFrom');
 
-    return fetch('http://' + loadProfilesFrom)
+    return fetch('//' + loadProfilesFrom)
       .then(response => response.json())
       .then(data => {
         return {
